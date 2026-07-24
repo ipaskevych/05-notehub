@@ -8,16 +8,16 @@ interface NoteFormProps {
   onClose: () => void;
 }
 
+// ДОБАВЛЕНО: 'Todo' и 'Meeting' по требованию ментора
 const validationSchema = Yup.object({
   title: Yup.string().required('Title is required'),
   content: Yup.string().optional(),
-  tag: Yup.string().oneOf(['Work', 'Personal', 'Shopping']).required('Tag is required'),
+  tag: Yup.string().oneOf(['Work', 'Personal', 'Shopping', 'Todo', 'Meeting']).required('Tag is required'),
 });
 
 export default function NoteForm({ onClose }: NoteFormProps) {
   const queryClient = useQueryClient();
 
-  // Мутация создания заметки и обновление списка
   const mutation = useMutation({
     mutationFn: createNote,
     onSuccess: () => {
@@ -48,6 +48,7 @@ export default function NoteForm({ onClose }: NoteFormProps) {
           value={formik.values.title}
           className={css.input}
         />
+        {/* ИСПРАВЛЕНО: Выводим текст ошибки через formik.errors */}
         {formik.touched.title && formik.errors.title ? (
           <div className={css.error}>{formik.errors.title}</div>
         ) : null}
@@ -77,13 +78,19 @@ export default function NoteForm({ onClose }: NoteFormProps) {
           value={formik.values.tag}
           className={css.select}
         >
+          {/* ДОБАВЛЕНО: Все 5 доступных опций селектора */}
           <option value="Work">Work</option>
           <option value="Personal">Personal</option>
           <option value="Shopping">Shopping</option>
+          <option value="Todo">Todo</option>
+          <option value="Meeting">Meeting</option>
         </select>
+        {formik.touched.tag && formik.errors.tag ? (
+          <div className={css.error}>{formik.errors.tag}</div>
+        ) : null}
       </div>
 
-      {/* Блок кнопок внизу формы */}
+      {/* Кнопки формы */}
       <div className={css.actions}>
         <button type="button" onClick={onClose} className={css.cancelButton}>
           Cancel
