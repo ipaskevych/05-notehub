@@ -2,31 +2,40 @@ import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import css from './Modal.module.css';
 
-// Здесь мы четко говорим TypeScript, что модалка принимает любые элементы (children)
 interface ModalProps {
+  isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
 }
 
-const modalRoot = document.querySelector('#modal-root') || document.body;
-
-export default function Modal({ onClose, children }: ModalProps) {
+export default function Modal({ isOpen, onClose, children }: ModalProps) {
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+    if (!isOpen) return;
 
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.currentTarget === e.target) onClose();
-  };
+    // Блокируем скролл страницы при открытой модалке по ТЗ
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
 
   return createPortal(
-    <div className={css.backdrop} role="dialog" aria-modal="true" onClick={handleBackdropClick}>
-      <div className={css.modal}>{children}</div>
+    <div className={css.backdrop} onClick={onClose}>
+      {/* ИСПРАВЛЕНО: Заменили css.content на css.modal из твоего CSS */}
+      <div className={css.modal} onClick={(e) => e.stopPropagation()}>
+        {children}
+      </div>
     </div>,
-    modalRoot
+    document.getElementById('modal-root')!
   );
 }

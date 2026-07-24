@@ -7,14 +7,12 @@ interface SearchBoxProps {
 
 export default function SearchBox({ value, onChange }: SearchBoxProps) {
   return (
-    <div className={css.container}>
-      <input
-        className={css.input}
-        type="text"
-        placeholder="Search notes..."
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      />
-    </div>
+    <input
+      type="text"
+      placeholder="Search notes..."
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={css.input} // Применили класс из твоего CSS-файла
+    />
   );
 }

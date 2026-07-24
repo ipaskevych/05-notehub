@@ -1,5 +1,13 @@
 import axios from 'axios';
-import type { Note, NewNote, FetchNotesResponse } from '../types/note';
+import type { Note, NewNote } from '../types/note';
+// Перенесено сюда по требованию ментора
+export interface FetchNotesResponse {
+  notes: Note[];
+  page: number;
+  perPage: number;
+  totalNotes: number;
+  totalPages: number;
+}
 
 const noteApi = axios.create({
   baseURL: import.meta.env.VITE_NOTEHUB_API_URL,
@@ -8,13 +16,12 @@ const noteApi = axios.create({
   },
 });
 
-export const fetchNotes = async (page: number, perPage: number, search: string) => {
+export const fetchNotes = async (page: number, perPage: number, search: string): Promise<FetchNotesResponse> => {
   const response = await noteApi.get<FetchNotesResponse>('/notes', {
     params: {
-      page: page,         // Подставит текущую страницу (из ссылки №2)
-      perPage: perPage,   // Подставит 12 (из ссылки №2)
-      // Если инпут пустой, параметр поиска вообще не отправится (и бэкенд вернет все заметки)
-      search: search.trim() ? search : undefined, 
+      page,
+      perPage,
+      search: search.trim() ? search : undefined,
     },
   });
   return response.data;
@@ -25,7 +32,8 @@ export const createNote = async (note: NewNote): Promise<Note> => {
   return response.data;
 };
 
-export const deleteNote = async (id: string): Promise<void> => {
-  await noteApi.delete(`/notes/${id}`);
+// ИСПРАВЛЕНО: Теперь возвращает Promise<Note> вместо void
+export const deleteNote = async (id: string): Promise<Note> => {
+  const response = await noteApi.delete<Note>(`/notes/${id}`);
+  return response.data;
 };
-
